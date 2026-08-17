@@ -49,16 +49,39 @@
 // }
 // ************************************************************
 
-namespace Application
-{
-	// A static class can only inherit directly 
-	// from the System.Object class.
-	internal static class Program // Note: 'base : object' is implicit for static classes
+// ************************************************************
+
+//namespace Application
+//{
+//	// A static class can only inherit directly 
+//	// from the System.Object class.
+//	internal static class Program // Note: 'base : object' is implicit for static classes
+//	{
+//		// A static constructor is executed only once:
+//		// Either when the first instance is created, or when 
+//		// a static member is accessed for the first time.
+//		// It runs at most once during the application's lifecycle.
+//		static Program()
+//		{
+//		}
+
+//		private static void Main(string[] args)
+//		{
+//			System.Console.WriteLine(value: "Hello, World!");
+//		}
+//	}
+//}
+// ************************************************************
+
+// ************************************************************
+
+// File-scoped namespaces (introduced in .NET 6)
+// This syntax reduces one level of indentation and 
+// removes unnecessary curly braces, making the code cleaner.
+namespace Application;
+	internal static class Program 
 	{
-		// A static constructor is executed only once:
-		// Either when the first instance is created, or when 
-		// a static member is accessed for the first time.
-		// It runs at most once during the application's lifecycle.
+
 		static Program()
 		{
 		}
@@ -68,4 +91,3 @@ namespace Application
 			System.Console.WriteLine(value: "Hello, World!");
 		}
 	}
-}
