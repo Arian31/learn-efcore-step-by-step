@@ -9,7 +9,7 @@
 
 // Historical Note: In older architectures, the name "Models" was 
 // commonly used. In modern patterns (like DDD), this name has 
-// evolved to "Domain".
+// evolved to "Domain".  
 
 // Note: No NuGet packages are required for this POCO class.
 // POCO => Plain Old CLR Object
