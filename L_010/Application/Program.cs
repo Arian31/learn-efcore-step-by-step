@@ -100,8 +100,108 @@
 
 #region Solution 3: Explicit Resource Management (Try-Catch-Finally)
 
-// Although this approach is considered legacy, it offers more flexibility 
-// and granular control, particularly within the Catch and Finally blocks.
+//// Although this approach is considered legacy, it offers more flexibility 
+//// and granular control, particularly within the Catch and Finally blocks.
+//namespace Application;
+
+//internal static class Program : object
+//{
+//	static Program()
+//	{
+//	}
+
+//	private static void Main(string[] args)
+//	{
+//		CreatePerson();
+//	}
+
+//	private static void CreatePerson()
+//	{
+//		// Declaring the context outside the try block to ensure it is 
+//		// accessible within the finally block for proper disposal.
+//		Models.DatabaseContext? databaseContext = null;
+
+//		try
+//		{
+//			databaseContext = new Models.DatabaseContext();
+
+//			var person = new Models.Person
+//			{
+//				Name = "p3",
+//			};
+
+//			databaseContext.Add(entity: person);
+//			databaseContext.SaveChanges();
+//		}
+//		catch (System.Exception ex)
+//		{
+//			// Critical Step: Log the exception details to a file or monitoring system.
+//			System.Console.WriteLine(value: ex.Message);
+//		}
+//		finally
+//		{
+//			// The finally block executes regardless of whether an exception occurred.
+//			if (databaseContext != null)
+//			{
+//				// Explicitly releasing database connections and unmanaged resources.
+//				databaseContext.Dispose();
+
+//				// Note: Explicitly setting the context to null was a common convention 
+//				// in EF Classic to aid the Garbage Collector. In EF Core, this practice 
+//				// is generally unnecessary as Dispose handles resource cleanup efficiently.
+//				// databaseContext = null;
+//			}
+//		}
+//	}
+//}
+
+#endregion
+
+
+#region Solution 4: Standard Using Block for Scoped Disposal
+
+//// This approach often provides better readability compared to Solution 5.
+//// In modern software development, Clean Code principles prioritize clarity 
+//// and maintainability over minimizing the number of lines written.
+//namespace Application;
+
+//internal static class Program : object
+//{
+//	static Program()
+//	{
+//	}
+
+//	private static void Main(string[] args)
+//	{
+//		CreatePerson();
+//	}
+
+//	private static void CreatePerson()
+//	{
+//		// The 'using' block ensures that the IDisposable object (DatabaseContext) 
+//		// is automatically disposed of as soon as the block is exited.
+//		// This syntax clearly defines the scope and lifetime of the resource.
+//		using (var databaseContext = new Models.DatabaseContext())
+//		{
+//			var person = new Models.Person
+//			{
+//				Name = "p4",
+//			};
+
+//			databaseContext.Add(entity: person);
+//			databaseContext.SaveChanges();
+//		}
+//		// Disposal happens here automatically, even if an exception occurs.
+//	}
+//}
+
+#endregion
+
+
+#region Solution 5: Using Declarations (C# 8.0+)
+
+// Personally, I prefer Solution 3 or 4 due to their explicit boundary definitions.
+// However, this modern syntax is available and offers a more streamlined approach.
 namespace Application;
 
 internal static class Program : object
@@ -117,117 +217,22 @@ internal static class Program : object
 
 	private static void CreatePerson()
 	{
-		// Declaring the context outside the try block to ensure it is 
-		// accessible within the finally block for proper disposal.
-		Models.DatabaseContext? databaseContext = null;
+		// 'Using declaration' (introduced in C# 8.0): 
+		// The variable is disposed at the end of the enclosing scope (the method).
+		// This eliminates the need for extra curly braces and reduces indentation.
+		using var databaseContext = new Models.DatabaseContext();
 
-		try
+		var person = new Models.Person
 		{
-			databaseContext = new Models.DatabaseContext();
+			Name = "p5",
+		};
 
-			var person = new Models.Person
-			{
-				Name = "p3",
-			};
+		databaseContext.Add(entity: person);
+		databaseContext.SaveChanges();
 
-			databaseContext.Add(entity: person);
-			databaseContext.SaveChanges();
-		}
-		catch (System.Exception ex)
-		{
-			// Critical Step: Log the exception details to a file or monitoring system.
-			System.Console.WriteLine(value: ex.Message);
-		}
-		finally
-		{
-			// The finally block executes regardless of whether an exception occurred.
-			if (databaseContext != null)
-			{
-				// Explicitly releasing database connections and unmanaged resources.
-				databaseContext.Dispose();
-
-				// Note: Explicitly setting the context to null was a common convention 
-				// in EF Classic to aid the Garbage Collector. In EF Core, this practice 
-				// is generally unnecessary as Dispose handles resource cleanup efficiently.
-				// databaseContext = null;
-			}
-		}
+		// Note: The database connection remains open until the very end of 
+		// this method, even if we no longer need it after SaveChanges().
 	}
 }
 
 #endregion
-
-
-#region Solution 4
-// در این روش خوانایی برنامه نسبت به سلوشن 5 بالاتر هست
-// در دنیای امروز برخلاف گذشته که اگر با یک خط ده کار را انجام میدادی و خوشحال بودی. کلین کد حرف اول را میزند
-//namespace Application;
-
-//internal static class Program : object
-//{
-//	static Program()
-//	{
-//	}
-
-//	private static void Main(string[] args)
-//	{
-//		CreatePerson();
-//	}
-
-//	private static void CreatePerson()
-//	{
-
-//		using (var databaseContext = new Models.DatabaseContext())
-//		{ 
-
-//			var person =
-//				new Models.Person
-//				{
-
-//					Name = "p4",
-//				};
-
-//		databaseContext.Add(entity: person);
-//		databaseContext.SaveChanges();
-//		}
-//	}
-//}
-
-#endregion
-#region Solution 5
-// من ترجیح میدم از سلوشن 3 یا 4 استفاده کنم
-// ولی این روش هم وجود دارد و میتوانید از اون استفاده کنید
-//namespace Application;
-
-//internal static class Program : object
-//{
-//	static Program()
-//	{
-//	}
-
-//	private static void Main(string[] args)
-//	{
-//		CreatePerson();
-//	}
-
-//	private static void CreatePerson()
-//	{
-
-//		using var databaseContext =
-//			new Models.DatabaseContext();
-
-
-//		var person =
-//			new Models.Person
-//			{
-
-//				Name = "p5",
-//			};
-
-//		databaseContext.Add(entity: person);
-//		databaseContext.SaveChanges();
-//	}
-//}
-
-#endregion
-
