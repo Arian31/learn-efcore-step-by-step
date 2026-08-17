@@ -200,9 +200,44 @@
 
 #region Solution 5: Using Declarations (C# 8.0+)
 
-// Personally, I prefer Solution 3 or 4 due to their explicit boundary definitions.
-// However, this modern syntax is available and offers a more streamlined approach.
-namespace Application;
+//// Personally, I prefer Solution 3 or 4 due to their explicit boundary definitions.
+//// However, this modern syntax is available and offers a more streamlined approach.
+//namespace Application;
+
+//internal static class Program : object
+//{
+//	static Program()
+//	{
+//	}
+
+//	private static void Main(string[] args)
+//	{
+//		CreatePerson();
+//	}
+
+//	private static void CreatePerson()
+//	{
+//		// 'Using declaration' (introduced in C# 8.0): 
+//		// The variable is disposed at the end of the enclosing scope (the method).
+//		// This eliminates the need for extra curly braces and reduces indentation.
+//		using var databaseContext = new Models.DatabaseContext();
+
+//		var person = new Models.Person
+//		{
+//			Name = "p5",
+//		};
+
+//		databaseContext.Add(entity: person);
+//		databaseContext.SaveChanges();
+
+//		// Note: The database connection remains open until the very end of 
+//		// this method, even if we no longer need it after SaveChanges().
+//	}
+//}
+
+#endregion
+
+#region Solution 6
 
 internal static class Program : object
 {
@@ -217,21 +252,64 @@ internal static class Program : object
 
 	private static void CreatePerson()
 	{
-		// 'Using declaration' (introduced in C# 8.0): 
-		// The variable is disposed at the end of the enclosing scope (the method).
-		// This eliminates the need for extra curly braces and reduces indentation.
-		using var databaseContext = new Models.DatabaseContext();
-
-		var person = new Models.Person
+		using (var databaseContext = new Models.DatabaseContext())
 		{
-			Name = "p5",
-		};
+			var person = new Models.Person
+			{
+				Name = "p6",
+			};
+			// type : Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry
+			// در این خصوص در آینده بیشتر باهاش کار میکنیم.
+			// فعلا به عنوان نمونه می نویسم
+			var entityEntry =
+				databaseContext.people.Add(entity: person);
+			// OR
+			entityEntry =
+				databaseContext.Entry(entity: person);
+			// اینطور تصور کنید که یک کالکشن مخفی وجود دارد و کارهایی که با entityها انجام می دهید؛ رکورد ها در آن کالکشن ایجاد می شود و یک state بهش میخوره
+			// زمانی که دستور SaveChanges را بکار می برید، از آن لیست، نه از databaseContext.people یک لوپ میزند و نگاه میکند هر رکورد چه اتفاقی برایش افتاده
+			//Detached و Unchanged در آن لیست نمیرود
+			switch (entityEntry.State)
+			{
+				// بعد از اینکه شخص را نیو کردم.دستور خط بالا رو بنویسم
+				// رو هوا ساخته شده، نه ربطی به دیتابیس داره،هیچ اتفاقی برایش نیوفتاده
+				case Microsoft.EntityFrameworkCore.EntityState.Detached:
+				break;
+				// اگر یک رکورد را از دیتابیس بیاوریم و هیچ کاری با آن نکنیم به این حالت در می آید
+				case Microsoft.EntityFrameworkCore.EntityState.Unchanged:
+				break;
+				// اگر رکوردی را حذف کنیم
+				case Microsoft.EntityFrameworkCore.EntityState.Deleted:
+				break;
+				// اگر یک رکورد را از دیتابیس بیاوریم و یکی از پروپرتی ها را تغییر دهیم
+				case Microsoft.EntityFrameworkCore.EntityState.Modified:
+				break;
+				// زمانی که شخص اضافه میشود state آن این میشود
+				case Microsoft.EntityFrameworkCore.EntityState.Added:
+				break;
+				default:
+				break;
+			}
 
-		databaseContext.Add(entity: person);
-		databaseContext.SaveChanges();
+			// new in EF Core
+			// خروجی آن از جنس Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry است.
+			entityEntry =
+				databaseContext.Add(entity: person);
 
-		// Note: The database connection remains open until the very end of 
-		// this method, even if we no longer need it after SaveChanges().
+			int id =
+				person.Id;
+			//در EF Core خطا می دهد
+			// در EF خطا نمیداد و صرفا به آن بی توجه بود
+			//person.Id = 123;
+			//Error : Cannot insert explicit value for identity column
+			// in table 'people' when IDENTITY_INSERT is set
+			// to off
+			id =
+				person.Id;
+
+			databaseContext.Add(entity: person);
+			databaseContext.SaveChanges();
+		}
 	}
 }
 
