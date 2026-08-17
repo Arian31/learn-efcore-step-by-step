@@ -79,15 +79,15 @@
 // This syntax reduces one level of indentation and 
 // removes unnecessary curly braces, making the code cleaner.
 namespace Application;
-	internal static class Program 
+internal static class Program
+{
+
+	static Program()
 	{
-
-		static Program()
-		{
-		}
-
-		private static void Main(string[] args)
-		{
-			System.Console.WriteLine(value: "Hello, World!");
-		}
 	}
+
+	private static void Main(string[] args)
+	{
+		System.Console.WriteLine(value: "Hello, World!");
+	}
+}

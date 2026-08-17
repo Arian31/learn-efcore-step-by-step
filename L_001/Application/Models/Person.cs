@@ -16,7 +16,7 @@
 
 namespace Models;
 
-public class Person : Object
+public class Person : object
 {
 	public Person() : base()
 	{
